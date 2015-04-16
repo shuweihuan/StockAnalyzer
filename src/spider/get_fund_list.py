@@ -64,7 +64,7 @@ def get_ranking_list_data(url, fout):
 		td_list = tr.find_all('td')
 		if len(td_list) != 14:
 			continue
-		for td in td_list[1:11]:
+		for td in td_list[1:12]:
 			s += td.get_text().encode('utf-8')
 			s += "\t"
 		fout.write(s.strip() + "\n")
