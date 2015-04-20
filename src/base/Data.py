@@ -91,6 +91,15 @@ class Data:
 		s = "\n".join(self.getReversedAttr(key))
 		fout.write(s + "\n")
 
+	def replaceValue(self, value, new_value):
+		n = 0
+		for i in range(self.nRow):
+			for j in range(self.nCol):
+				if self.body[i][j] == value:
+					self.body[i][j] = new_value
+					n += 1
+		return n
+
 	def sortByAttr(self, key, value_type = 'string', reverse = False):
 		if not value_type in ['string', 'number']:
 			return False
@@ -120,13 +129,13 @@ class Data:
 	def innerJoin(self, data, key_a, key_b):
 		return self._join(data, key_a, key_b, 'inner')
 
-	def outerJoin(self, data, key_a, key_b, default_value = "-"):
-		return self._join(data, key_a, key_b, 'outer')
+	def outerJoin(self, data, key_a, key_b, default_value='-'):
+		return self._join(data, key_a, key_b, 'outer', default_value)
 
-	def leftJoin(self, data, key_a, key_b, default_value = "-"):
-		return self._join(data, key_a, key_b, 'left')
+	def leftJoin(self, data, key_a, key_b, default_value='-'):
+		return self._join(data, key_a, key_b, 'left', default_value)
 
-	def _join(self, data, key_a, key_b, join_type, default_value = '-'):
+	def _join(self, data, key_a, key_b, join_type, default_value='-'):
 		if not join_type in ['inner', 'outer', 'left']:
 			return []
 		key_a_index = self.head.index(key_a)
@@ -231,8 +240,15 @@ if __name__ == "__main__":
 
 	print ""
 
-	print ("* A.outerJoin(D, 'A', 'A')")
-	a.outerJoin(d,'A','A').dump()
+	print ("* A.outerJoin(D, 'A', 'A', 'n/a')")
+	a.outerJoin(d,'A','A','n/a').dump()
+
+	print ""
+
+	print ("* A.outerJoin(D, 'A', 'A', 'n/a'); A.replaceValue('n/a', '-')")
+	x = a.outerJoin(d,'A','A','n/a')
+	x.replaceValue('n/a', '-')
+	x.dump()
 
 	print ""
 
