@@ -5,71 +5,109 @@ import os
 import sys
 import time
 import string
-import urllib2
 import re
 from bs4 import BeautifulSoup
+sys.path.append("..")
+from base.Data import Data
+from base.Spider import Spider
+
+all_funds_value_url = "http://www.howbuy.com/board/"
+stock_funds_value_url = "http://www.howbuy.com/board/gupiao.htm"
+hybrid_funds_value_url = "http://www.howbuy.com/board/hunhe.htm"
+index_funds_value_url = "http://www.howbuy.com/board/zhishu.htm"
+
+all_funds_ranking_url = "http://www.howbuy.com/fund/fundranking/"
+stock_funds_ranking_url = "http://www.howbuy.com/fund/fundranking/gupiao.htm"
+hybrid_funds_ranking_url = "http://www.howbuy.com/fund/fundranking/hunhe.htm"
+index_funds_ranking_url = "http://www.howbuy.com/fund/fundranking/zhishu.htm"
+
+fund_url_prefix = "http://www.howbuy.com/fund/"
 
 latest_stock_position_url_prefix = "http://jingzhi.funds.hexun.com/Detail/DataOutput/Top10HoldingStock.aspx?fundcode="
 fund_stock_url_prefix = "http://jingzhi.funds.hexun.com/database/cgmx.aspx?fundcode="
 
-def get_html(url):
-	request = urllib2.Request(url)
-	request.add_header('User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:30.0) Gecko/20100101 Firefox/30.0')
-	opener = urllib2.build_opener()
-	html = opener.open(request).read()
-	return html
+def get_info_date():
+	html = Spider.getHtml(all_funds_value_url)
+	soup = BeautifulSoup(html)
+	info = soup.find('div', class_='dataTables').find('div', class_='quotation')
+	info_text = info.get_text().encode('utf-8')
+	info_date = re.search(r'(\d+)-(\d+)-(\d+)', info_text).group(0)
+	return info_date
+
+def get_value_list(url):
+	html = Spider.getHtml(url)
+	soup = BeautifulSoup(html)
+	head = ['FundCode','FundName','UnitValue','AccValue','PrevUnitValue','PrevAccValue','Increase','IncreaseRate']
+	data = Data(head, [])
+	table = soup.find('div', class_='dataTables').find('div', 'result_list')
+	tr_list = table.find_all('tr')
+	for tr in tr_list:
+		item = []
+		td_list = tr.find_all('td')
+		if len(td_list) != 11:
+			continue
+		for td in td_list[2:10]:
+			item.append(td.get_text().encode('utf-8'))
+		data.addItem(item)
+	return data
+
+def get_ranking_list(url):
+	html = Spider.getHtml(url)
+	soup = BeautifulSoup(html)
+	head = ['FundCode','FundName','Date','Value','WeeklyYield','MonthlyYield','QuarterlyYield','HalfYearYield','YearlyYield','ThisYearYield']
+	data = Data(head, [])
+	table = soup.find('div', class_='dataTables').find('div', 'result_list')
+	tr_list = table.find_all('tr')
+	for tr in tr_list:
+		item = []
+		td_list = tr.find_all('td')
+		if len(td_list) != 14:
+			continue
+		for td in td_list[2:12]:
+			item.append(td.get_text().encode('utf-8'))
+		data.addItem(item)
+	return data
 
 def get_latest_stock_position(code):
 	url = latest_stock_position_url_prefix + code
-	html = get_html(url)
+	html = Spider.getHtml(url)
 	soup = BeautifulSoup(html)
-	data_body = soup.find('table')
-	data = []
-	tr_list = data_body.find_all('tr')
+	head = ['FundCode','StockName','StockPrice','Increase','StockVolume','StockPosition']
+	data = Data(head, [])
+	table = soup.find('table')
+	tr_list = table.find_all('tr')
 	for tr in tr_list[1:]:
+		item = [code]
 		td_list = tr.find_all('td')
-		s = ""
-		s += td_list[0].get_text().encode('utf-8')
-		s += "\t"
-		s += td_list[3].get_text().encode('utf-8')
-		s += "\t"
-		s += td_list[4].get_text().encode('utf-8')
-		data.append(s)
+		for td in td_list:
+			item.append(td.get_text().encode('utf-8'))
+		data.addItem(item)
 	return data
-
-def output_latest_stock_position_head(fout):
-	fout.write("#FundCode\tStockName\tStockVolume\tStockPosition\n")
-	
-def output_latest_stock_position_data(fout, code, data):
-	for i in data:
-		fout.write(code + "\t" + i + "\n")
 
 if __name__ == '__main__':
 	
-	# environment
-	date = time.strftime('%Y-%m-%d',time.localtime(time.time()))
-	data_path = "data"
-	if not os.path.isdir(data_path):
-		os.mkdir(data_path)
+#	date = time.strftime('%Y-%m-%d',time.localtime(time.time()))
 
-#	data = get_latest_stock_position("070001")
-#	output_latest_stock_position_head(sys.stdout)
-#	output_latest_stock_position_data(sys.stdout, data)
+	fout = open('test.data', 'w')
 
-	stock_funds_stock_position_file = os.path.join(data_path, "stock_funds_stock_position" + ".data")
-	if os.path.isfile(stock_funds_stock_position_file):
-		sys.stderr.write("warning: file '" + stock_funds_stock_position_file + "' exists.\n")
-	fout = open(stock_funds_stock_position_file, 'w')
+	info_date = get_info_date()
+	fout.write(info_date + '\n')
 
-	input_file = os.path.join(data_path, "stock_funds_ranking.20150414.data")
-	fin = open(input_file, 'r')
-	output_latest_stock_position_head(fout)
-	for line in fin:
-		line = line.strip()
-		f = line.split('\t')
-		code = f[1]
-		data = get_latest_stock_position(code)
-		output_latest_stock_position_data(fout, code, data)
-	fin.close()
+	fout.write('\n')
+
+	data = get_value_list(all_funds_value_url)
+	data.dump(fout)
+
+	fout.write('\n')
+
+	data = get_ranking_list(all_funds_ranking_url)
+	data.dump(fout)
+
+	fout.write('\n')
+
+	data = get_latest_stock_position("070021")
+	data.dump(fout)
+
+	fout.write('\n')
+
 	fout.close()
-	

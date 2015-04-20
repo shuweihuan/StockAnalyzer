@@ -2,7 +2,6 @@
 #coding: utf-8
 
 import sys
-import copy
 
 class Data:
 	
@@ -20,7 +19,7 @@ class Data:
 	
 	def dumpBody(self, fout=sys.stdout):
 		for i in range(self.nRow):
-			self.dumpItem(i)
+			self.dumpItem(i, fout)
 
 	def dump(self, fout=sys.stdout):
 		self.dumpHead(fout)
