@@ -3,6 +3,18 @@
 source ../conf/global.conf
 
 ################################
+######### Environment ##########
+################################
+
+if [ -z $RAW_PATH ]; then
+	mkdir $RAW_PATH
+fi
+
+if [ -z $DATA_PATH ]; then
+	mkdir $DATA_PATH
+fi
+
+################################
 ########### Get Data ###########
 ################################
 
