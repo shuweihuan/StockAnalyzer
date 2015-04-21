@@ -8,6 +8,7 @@ import string
 import re
 from bs4 import BeautifulSoup
 sys.path.append("..")
+from base.Log import Log
 from base.Data import Data
 from base.Spider import Spider
 
@@ -86,28 +87,88 @@ def get_latest_stock_position(code):
 
 if __name__ == '__main__':
 	
-#	date = time.strftime('%Y-%m-%d',time.localtime(time.time()))
+	if len(sys.argv) != 2:
+		msg = "invalid arguments: "
+		msg += " ".join(sys.argv)
+		msg += "."
+		Log.error(msg)
+		sys.exit(1)
 
-	fout = open('test.data', 'w')
+	output_path = sys.argv[1]
+	if not os.path.isdir(output_path):
+		os.mkdir(output_path)
+	
+	info_date = get_info_date().replace('-','')
 
-	info_date = get_info_date()
-	fout.write(info_date + '\n')
-
-	fout.write('\n')
-
+	# all funds value
+	file_name = "all_funds_value." + info_date + ".data"
+	file_path = os.path.join(output_path, file_name)
+	fout = open(file_path, 'w')
 	data = get_value_list(all_funds_value_url)
 	data.dump(fout)
+	fout.close
 
-	fout.write('\n')
-
+	# all funds ranking
+	file_name = "all_funds_ranking." + info_date + ".data"
+	file_path = os.path.join(output_path, file_name)
+	fout = open(file_path, 'w')
 	data = get_ranking_list(all_funds_ranking_url)
 	data.dump(fout)
+	fout.close
 
-	fout.write('\n')
+	# stock funds value
+	file_name = "stock_funds_value." + info_date + ".data"
+	file_path = os.path.join(output_path, file_name)
+	fout = open(file_path, 'w')
+	data = get_value_list(stock_funds_value_url)
+	data.dump(fout)
+	fout.close
 
+	# stock funds ranking
+	file_name = "stock_funds_ranking." + info_date + ".data"
+	file_path = os.path.join(output_path, file_name)
+	fout = open(file_path, 'w')
+	data = get_ranking_list(stock_funds_ranking_url)
+	data.dump(fout)
+	fout.close
+
+	# hybrid funds value
+	file_name = "hybrid_funds_value." + info_date + ".data"
+	file_path = os.path.join(output_path, file_name)
+	fout = open(file_path, 'w')
+	data = get_value_list(hybrid_funds_value_url)
+	data.dump(fout)
+	fout.close
+
+	# hybrid funds ranking
+	file_name = "hybrid_funds_ranking." + info_date + ".data"
+	file_path = os.path.join(output_path, file_name)
+	fout = open(file_path, 'w')
+	data = get_ranking_list(hybrid_funds_ranking_url)
+	data.dump(fout)
+	fout.close
+
+	# index funds value
+	file_name = "index_funds_value." + info_date + ".data"
+	file_path = os.path.join(output_path, file_name)
+	fout = open(file_path, 'w')
+	data = get_value_list(index_funds_value_url)
+	data.dump(fout)
+	fout.close
+
+	# index funds ranking
+	file_name = "index_funds_ranking." + info_date + ".data"
+	file_path = os.path.join(output_path, file_name)
+	fout = open(file_path, 'w')
+	data = get_ranking_list(index_funds_ranking_url)
+	data.dump(fout)
+	fout.close
+
+	# latest stock position
+	file_name = "latest_stock_position." + info_date + ".data"
+	file_path = os.path.join(output_path, file_name)
+	fout = open(file_path, 'w')
 	data = get_latest_stock_position("070021")
 	data.dump(fout)
+	fout.close
 
-	fout.write('\n')
-
-	fout.close()
