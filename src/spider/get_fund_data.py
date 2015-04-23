@@ -87,7 +87,7 @@ def get_latest_stock_position(code):
 
 if __name__ == '__main__':
 	
-	if len(sys.argv) != 2:
+	if len(sys.argv) != 3:
 		msg = "invalid arguments: "
 		msg += " ".join(sys.argv)
 		msg += "."
@@ -97,8 +97,10 @@ if __name__ == '__main__':
 	output_path = sys.argv[1]
 	if not os.path.isdir(output_path):
 		os.mkdir(output_path)
-	
+
 	info_date = get_info_date().replace('-','')
+
+	code_list = []
 
 	# all funds value
 	file_name = "all_funds_value." + info_date + ".data"
@@ -124,6 +126,8 @@ if __name__ == '__main__':
 	data.dump(fout)
 	fout.close
 
+	code_list += data.getReversedAttr('FundCode')
+
 	# stock funds ranking
 	file_name = "stock_funds_ranking." + info_date + ".data"
 	file_path = os.path.join(output_path, file_name)
@@ -139,6 +143,8 @@ if __name__ == '__main__':
 	data = get_value_list(hybrid_funds_value_url)
 	data.dump(fout)
 	fout.close
+
+	code_list += data.getReversedAttr('FundCode')
 
 	# hybrid funds ranking
 	file_name = "hybrid_funds_ranking." + info_date + ".data"
@@ -156,6 +162,8 @@ if __name__ == '__main__':
 	data.dump(fout)
 	fout.close
 
+	code_list += data.getReversedAttr('FundCode')
+
 	# index funds ranking
 	file_name = "index_funds_ranking." + info_date + ".data"
 	file_path = os.path.join(output_path, file_name)
@@ -168,7 +176,10 @@ if __name__ == '__main__':
 	file_name = "latest_stock_position." + info_date + ".data"
 	file_path = os.path.join(output_path, file_name)
 	fout = open(file_path, 'w')
-	data = get_latest_stock_position("070021")
+	code_list = set(code_list)
+	data = Data()
+	for code in code_list:
+		data.cat(get_latest_stock_position(code))
 	data.dump(fout)
 	fout.close
 

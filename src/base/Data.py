@@ -76,6 +76,16 @@ class Data:
 		self.nCol += 1
 		return True
 
+	def dropAttr(self, key):
+		index = self.head.index(key)
+		if index < 0:
+			return False
+		del self.head[index]
+		for i in range(self.nRow):
+			del self.body[i][index]
+		self.nCol -= 1
+		return True
+
 	def setAttr(self, key, value):
 		if len(value) != self.nRow:
 			return False
@@ -123,6 +133,37 @@ class Data:
 		self.body = []
 		for k,v in x:
 			self.body.append(v)
+		return True
+
+	def cat(self, data):
+		if self.head == []:
+			self.head = data.head
+		if self.head != data.head:
+			return False
+		for r in data.body:
+			self.body.append(r)
+			self.nRow += 1
+		return True
+
+	def load(self, file_path):
+		fin = open(file_path, 'r')
+		n = 0
+		self.head = []
+		self.body = []
+		for line in fin:
+			line = line.strip()
+			if n == 0:
+				if not line.startswith('#'):
+					return False
+				self.head = line[1:].split('\t')
+			else:
+				self.body.append(line.split('\t'))
+			n += 1
+		self.nCol = len(self.head)
+		self.nRow = len(self.body)
+		for r in self.body:
+			assert len(r) == self.nCol
+		fin.close()
 		return True
 
 	def innerJoin(self, data, key_a, key_b):

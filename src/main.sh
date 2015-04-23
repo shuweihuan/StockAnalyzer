@@ -22,3 +22,10 @@ cd $SRC_PATH/spider
 python get_fund_data.py $RAW_PATH
 cd - > /dev/null
 
+################################
+########## Merge Data ##########
+################################
+
+cd $SRC_PATH/analyzer
+python merge_data.py $RAW_PATH $DATA_PATH
+cd - > /dev/null
