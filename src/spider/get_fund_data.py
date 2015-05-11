@@ -24,9 +24,6 @@ index_funds_ranking_url = "http://www.howbuy.com/fund/fundranking/zhishu.htm"
 
 fund_url_prefix = "http://www.howbuy.com/fund/"
 
-latest_stock_position_url_prefix = "http://jingzhi.funds.hexun.com/Detail/DataOutput/Top10HoldingStock.aspx?fundcode="
-fund_stock_url_prefix = "http://jingzhi.funds.hexun.com/database/cgmx.aspx?fundcode="
-
 def get_info_date():
 	html = Spider.getHtml(all_funds_value_url)
 	soup = BeautifulSoup(html)
@@ -69,25 +66,9 @@ def get_ranking_list(url):
 		data.addItem(item)
 	return data
 
-def get_latest_stock_position(code):
-	url = latest_stock_position_url_prefix + code
-	html = Spider.getHtml(url)
-	soup = BeautifulSoup(html)
-	head = ['FundCode','StockName','StockPrice','Increase','StockVolume','StockPosition']
-	data = Data(head, [])
-	table = soup.find('table')
-	tr_list = table.find_all('tr')
-	for tr in tr_list[1:]:
-		item = [code]
-		td_list = tr.find_all('td')
-		for td in td_list:
-			item.append(td.get_text().encode('utf-8'))
-		data.addItem(item)
-	return data
-
 if __name__ == '__main__':
 	
-	if len(sys.argv) != 3:
+	if len(sys.argv) != 2:
 		msg = "invalid arguments: "
 		msg += " ".join(sys.argv)
 		msg += "."

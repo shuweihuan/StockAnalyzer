@@ -2,6 +2,7 @@
 #coding: utf-8
 
 import sys
+from Log import Log
 
 class Data:
 	
@@ -10,7 +11,7 @@ class Data:
 		self.body = body
 		self.nCol = len(head)
 		self.nRow = len(body)
-		for r in body:
+		for r in self.body:
 			assert len(r) == self.nCol
 
 	def dumpHead(self, fout=sys.stdout):
@@ -44,6 +45,7 @@ class Data:
 		return False
 
 	def dumpItem(self, index, fout=sys.stdout):
+		print "-> " + str(index)
 		s = "\t".join(self.getItem(index))
 		fout.write(s + "\n")
 
@@ -134,6 +136,17 @@ class Data:
 		for k,v in x:
 			self.body.append(v)
 		return True
+	
+	def filter(self, key, func):
+		index = self.head.index(key)
+		if index < 0:
+			return Data()
+		head = self.head
+		body = []
+		for r in body:
+			if func(r[index]) == True:
+				body.append(r)
+		return Data(head, body)
 
 	def cat(self, data):
 		if self.head == []:
@@ -156,15 +169,22 @@ class Data:
 				if not line.startswith('#'):
 					return False
 				self.head = line[1:].split('\t')
+				self.nCol = len(self.head)
 			else:
-				self.body.append(line.split('\t'))
+				r = line.split('\t')
+				if len(r) == self.nCol:
+					self.body.append(r)
 			n += 1
-		self.nCol = len(self.head)
 		self.nRow = len(self.body)
-		for r in self.body:
-			assert len(r) == self.nCol
 		fin.close()
 		return True
+
+	def getRows(self, rows):
+		head = self.head
+		body = []
+		for i in rows:
+			body.append(self.body[i])
+		return Data(head, body)
 
 	def innerJoin(self, data, key_a, key_b):
 		return self._join(data, key_a, key_b, 'inner')
