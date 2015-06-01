@@ -10,12 +10,14 @@ import re
 import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
+sys.path.append("../..")
+from conf.config import *
 sys.path.append("..")
 from base.Log import Log
 from base.Spider import Spider
 
 stock_list_url = "http://quote.eastmoney.com/stocklist.html"
-stock_price_history_url_pattern = "http://table.finance.yahoo.com/table.csv?s=CODE.MARKET"
+stock_history_url_pattern = "http://table.finance.yahoo.com/table.csv?s=CODE.MARKET"
 
 def is_stock_code(code):
 	if len(code) != 6:
@@ -61,16 +63,18 @@ def get_stock_list():
 									'Url' : url_list	})
 	return stock_list_df
 
-def download_stock_list(path):
+def download_stock_list():
 	d = get_stock_list()
-	d.to_csv(path)
+	if d.empty:
+		return False
+	d.to_csv(STOCK_LIST_DATA_PATH, index=False)
 	return True
 
-def get_stock_price_history(code):
+def get_stock_history(code):
 	market = get_stock_market(code)
 	if market == "unknown":
 		return pd.DataFrame()
-	url = stock_price_history_url_pattern.replace("CODE", code).replace("MARKET", market)
+	url = stock_history_url_pattern.replace("CODE", code).replace("MARKET", market)
 	try:
 		f = Spider.openUrl(url)
 		csv = pd.read_csv(f)
@@ -79,51 +83,30 @@ def get_stock_price_history(code):
 		return pd.DataFrame()
 	return csv
 
-def download_stock_price_history(code, path):
-	d = get_stock_price_history(code)
+def download_stock_history(code, path):
+	d = get_stock_history(code)
 	if d.empty:
 		return False
 	f = os.path.join(path, code+".csv")
-	d.to_csv(f)
+	d.to_csv(f, index=False)
 	return True
 
-def download_all_stock_price_history(path):
+def download_all_stock_history():
 	stock_list_df = get_stock_list()
+	if stock_list_df.empty:
+		return False
+	if not os.path.isdir(STOCK_HISTORY_PATH):
+		os.mkdir(STOCK_HISTORY_PATH)
 	for code in stock_list_df['Code']:
-		download_stock_price_history(code, path)
-		time.sleep(2)
+		download_stock_history(code, STOCK_HISTORY_PATH)
+		time.sleep(2.5)
 	return True
 
 if __name__ == '__main__':
 
-	if len(sys.argv) != 2:
-		msg = "invalid arguments: "
-		msg += " ".join(sys.argv)
-		msg += "."
-		Log.error(msg)
-		sys.exit(1)
-
-	data_path = sys.argv[1]
-
-	if not os.path.isdir(data_path):
-		os.mkdir(data_path)
-
 	# download stock list
-	stock_list_path = os.path.join(data_path, "stock_list.csv")
-	stock_list_bak_path = os.path.join(data_path, "stock_list.bak.csv")
-	if os.path.isfile(stock_list_path):
-		if os.path.isfile(stock_list_bak_path):
-			os.remove(stock_list_bak_path)
-		os.rename(stock_list_path, stock_list_bak_path)
-	download_stock_list(stock_list_path)
+	download_stock_list()
 
-	# download stock price history
-	stock_price_history_path = os.path.join(data_path, 'stock_price_history')
-	stock_price_history_bak_path = os.path.join(data_path, 'stock_price_history.bak')
-	if os.path.isdir(stock_price_history_path):
-		if os.path.isdir(stock_price_history_bak_path):
-			shutil.rmtree(stock_price_history_bak_path)
-		os.rename(stock_price_history_path, stock_price_history_bak_path)
-	os.mkdir(stock_price_history_path)
-	download_all_stock_price_history(stock_price_history_path)
+	# download stock history
+	download_all_stock_history()
 

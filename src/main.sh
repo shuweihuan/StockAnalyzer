@@ -6,10 +6,6 @@ source ../conf/global.conf
 ######### Environment ##########
 ################################
 
-if [ -z $RAW_PATH ]; then
-	mkdir $RAW_PATH
-fi
-
 if [ -z $DATA_PATH ]; then
 	mkdir $DATA_PATH
 fi
@@ -19,18 +15,26 @@ fi
 ################################
 
 cd $SRC_PATH/spider
-python get_fund_data.py $RAW_PATH
+python get_fund_data.py
 cd - > /dev/null
 
-#cd $SRC_PATH/spider
-#python get_stock_data.py $DATA_PATH
-#cd - > /dev/null
+cd $SRC_PATH/spider
+python get_stock_data.py
+cd - > /dev/null
 
-################################
-########## Merge Data ##########
-################################
+#################################
+######### Analyze Data ##########
+#################################
 
 cd $SRC_PATH/analyzer
-python merge_data.py $RAW_PATH $DATA_PATH
+python fund_stock_position.py
+cd - > /dev/null
+
+#################################
+########### Strategy ############
+#################################
+
+cd $SRC_PATH/strategy
+
 cd - > /dev/null
 
