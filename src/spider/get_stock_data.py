@@ -285,7 +285,7 @@ def download_latest_stock_debt():
 	return True
 
 def get_stock_cash(year, quarter):
-	d = ts.get_cash(year, quarter)
+	d = ts.get_cashflow_data(year, quarter)
 	if type(d) == types.NoneType:
 		return pd.DataFrame()
 	d.loc[:,"code"] = d["code"].apply(Stock.norm_code)
@@ -411,11 +411,11 @@ if __name__ == '__main__':
 #
 #	download_latest_stock_profit()
 #
-	download_all_stock_growth() # once
+#	download_all_stock_growth() # once
 #
 #	download_latest_stock_growth()
 #
-	download_all_stock_debt() # once
+#	download_all_stock_debt() # once
 #
 #	download_latest_stock_debt()
 #
