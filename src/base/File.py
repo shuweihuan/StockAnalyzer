@@ -6,7 +6,7 @@ import os
 class File:
 
 	@staticmethod
-	def getLatestFile(path, n=1):
+	def getLatestFileName(path, n=1):
 		if not os.path.isdir(path):
 			return ""
 		all_files = os.listdir(path)
@@ -17,6 +17,6 @@ class File:
 
 	@staticmethod
 	def getLatestFilePath(path, n=1):
-		file_name = File.getLatestFile(path, n)
+		file_name = File.getLatestFileName(path, n)
 		return os.path.join(path, file_name)
 
