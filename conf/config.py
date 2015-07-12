@@ -30,8 +30,10 @@ STOCK_PRICE_DATA_PATH = os.path.join(DATA_PATH, "stock_price.csv")
 STOCK_BASICS_DATA_PATH = os.path.join(DATA_PATH, "stock_basics.csv")
 FUND_INFO_DATA_PATH = os.path.join(DATA_PATH, "fund_info.csv")
 
+STRATEGY_EVAL_PATH = os.path.join(ANALYSIS_PATH, "strategy_eval")
+
 FUND_STOCK_POSITION_PATH = os.path.join(ANALYSIS_PATH, "fund_stock_position")
-STOCK_DAILY_INCR_PATH = os.path.join(ANALYSIS_PATH, "stock_daily_incr")
 STOCK_DAILY_INCR_DATA_PATH = os.path.join(ANALYSIS_PATH, "stock_daily_incr.csv")
+INDEX_DAILY_INCR_DATA_PATH = os.path.join(ANALYSIS_PATH, "index_daily_incr.csv")
 STOCK_QUARTERLY_INCR_DATA_PATH = os.path.join(ANALYSIS_PATH, "stock_quarterly_incr.csv")
 
